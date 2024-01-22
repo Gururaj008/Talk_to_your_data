@@ -10,7 +10,7 @@ from langchain.prompts import PromptTemplate
 from docx import Document
 
 
-GOOGLE_API_KEY = st.secrets["google_api_key"]
+GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
 
 def read_pdf(file):
     pdf_reader = PdfReader(file)
