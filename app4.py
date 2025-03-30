@@ -63,9 +63,9 @@ def generate_answer(user_question):
 You are an expert in evaluating profiles and answering questions based on the context provided.
 Follow these instructions carefully:
 1. Thoroughly analyze the provided context and answer the user question.
-2. Provide your answer in the form of bullet points
-3. Try to provide as much information as possible
-4. If the context does not contain sufficient information to answer the user question,then respond: 
+2. Provide your answer in the form of bullet points.
+3. Try to provide as much information as possible.
+4. If the context does not contain sufficient information to answer the user question, then respond: 
    "I can't answer the question based on the context provided, try rephrasing the question or ask a new question."
 5. Do not fabricate any details.
 
@@ -82,6 +82,40 @@ Answer:
     chain = load_qa_chain(model, chain_type="stuff", prompt=prompt)
     response = chain({"input_documents": docs, "question": user_question}, return_only_outputs=True)
     return response
+
+def format_response(answer_text):
+    """
+    This function formats the raw answer text into a custom-styled HTML unordered list.
+    Custom CSS is injected to improve the appearance (spacing, font-size, and margins).
+    """
+    # Custom CSS for the bullet list styling
+    custom_css = """
+    <style>
+    .custom-ul {
+      list-style: disc;
+      margin-left: 30px;
+      font-size: 18px;
+      line-height: 1.6;
+      color: #333;
+    }
+    .custom-ul li {
+      margin-bottom: 10px;
+    }
+    </style>
+    """
+    # Split answer text into lines and create bullet items
+    lines = answer_text.split('\n')
+    list_items = ""
+    for line in lines:
+        clean_line = line.strip()
+        if clean_line:
+            # Remove any bullet markers
+            if clean_line.startswith("*") or clean_line.startswith("-"):
+                clean_line = clean_line.lstrip("*- ").strip()
+            list_items += f"<li>{clean_line}</li>"
+    # Combine CSS and formatted list
+    formatted_html = custom_css + f"<ul class='custom-ul'>{list_items}</ul>"
+    return formatted_html
 
 if __name__ == "__main__":
     st.set_page_config(layout="wide")
@@ -143,7 +177,7 @@ if __name__ == "__main__":
     if not uploaded_files:
         st.warning("Please upload files first.")
 
-    # "Click here..." button for processing files
+    # "Click here to proceed" button for processing files
     if st.button('Click here to proceed', use_container_width=True) and uploaded_files:
         with st.spinner("Training..."):
             create_embeddings(uploaded_files)
@@ -158,14 +192,7 @@ if __name__ == "__main__":
         with st.spinner("Processing..."):
             response = generate_answer(user_question)
             res = response["output_text"]
-            
-            # Render the answer as an HTML unordered list
-            lines = res.split('\n')
-            formatted_answer = "<ul>"
-            for line in lines:
-                if line.strip():
-                    formatted_answer += f"<li>{line.lstrip('- ').strip()}</li>"
-            formatted_answer += "</ul>"
+            formatted_answer = format_response(res)
             
             st.markdown(formatted_answer, unsafe_allow_html=True)
             st.write('')
