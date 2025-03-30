@@ -155,6 +155,7 @@ if __name__ == "__main__":
             if not res:
                 st.error("No answer was generated. Please check your input or file content.")
             else:
+                # Use lighter text color for better visibility on dark themes
                 custom_css = """
                 <style>
                 ul {
@@ -162,14 +163,16 @@ if __name__ == "__main__":
                     margin-left: 40px;
                     font-size: 18px;
                     line-height: 1.6;
-                    color: #333;
+                    color: #fafafa; /* Light text for dark background */
                 }
                 li {
                     margin-bottom: 10px;
+                    color: #fafafa; /* Light text for dark background */
                 }
                 </style>
                 """
                 st.markdown(custom_css, unsafe_allow_html=True)
+                # Render the raw answer text as Markdown
                 st.markdown(res)
         st.info("Feel free to ask more questions or upload additional documents.")
 
