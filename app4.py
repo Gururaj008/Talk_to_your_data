@@ -58,25 +58,28 @@ def generate_answer(user_question):
     new_db = FAISS.load_local("faiss_index", embeddings)
     docs = new_db.similarity_search(user_question)
     
+    # Updated prompt with instructions for bullet list formatting and clear sections
     prompt_template = """
-    You are an expert in answering the user questions based on the context that is passed along.
-    Always stick to the following while answering the user questions:
-    1. Try to understand the user question thoroughly before answering the question
-    2. Answer the question as detailed as possible
-    3. If you don't know the answer or feel the answer is not present in the context,
-       politely tell the user "I cant answer the question based on the context provided, 
-       try rephrasing the question or ask a new question"
-    5. Don't try to make up an answer
-    
-    Context:
-    {context}
-    
-    Question:
-    {question}
-    
-    Answer:
-    """
+You are an expert in evaluating profiles and answering questions based on the context provided.
+Follow these instructions carefully:
+1. Thoroughly analyze the provided context.
+2. Structure your answer using bullet points and clearly mark the sections:
+   - **Strengths**
+   - **Weaknesses/Potential Areas for Inquiry**
+   - **Conclusion**
+3. Each bullet point should be concise and on its own line.
+4. If the context does not contain sufficient information, respond: 
+   "I can't answer the question based on the context provided, try rephrasing the question or ask a new question."
+5. Do not fabricate any details.
 
+Context:
+{context}
+
+Question:
+{question}
+
+Answer:
+"""
     model = ChatGoogleGenerativeAI(model="gemini-2.5-pro-exp-03-25", temperature=0)
     prompt = PromptTemplate(template=prompt_template, input_variables=["context", "question"])
     chain = load_qa_chain(model, chain_type="stuff", prompt=prompt)
@@ -116,22 +119,22 @@ if __name__ == "__main__":
     st.write('')
     st.subheader('How to use the app')
     st.markdown(
-        '<div style="text-align: justify">1. Begin by uploading your documents in PDF/DOCX/TXT format using the file uploader. The application supports multiple files simultaneously, making it convenient for batch processing.</div>',
+        '<div style="text-align: justify">1. Upload your documents (PDF/DOCX/TXT) using the file uploader. Multiple files can be processed at once.</div>',
         unsafe_allow_html=True
     )
     st.write('')
     st.markdown(
-        '<div style="text-align: justify">2. Hit the "Click here to proceed" button to allow the app to process and index the uploaded documents. This step involves creating embeddings and indexing the content for efficient retrieval. Once training is complete, the app is ready to respond to your queries.</div>',
+        '<div style="text-align: justify">2. Click the "Click here to proceed" button to process and index the uploaded documents.</div>',
         unsafe_allow_html=True
     )
     st.write('')
     st.markdown(
-        '<div style="text-align: justify">3. Enter your questions in the designated text box. SmartText Insight utilizes advanced language models to generate accurate and context-aware responses based on the content of the uploaded documents.</div>',
+        '<div style="text-align: justify">3. Enter your question in the text box below. The app will generate a response based on the content of your documents.</div>',
         unsafe_allow_html=True
     )
     st.write('')
     st.markdown(
-        '<div style="text-align: justify">4. Click the "Fetch Answer" button to prompt the app to analyze your questions against the indexed documents. The application will generate detailed responses, providing relevant information from the uploaded files.</div>',
+        '<div style="text-align: justify">4. Click the "Fetch the answer" button to view the detailed, bullet-pointed response.</div>',
         unsafe_allow_html=True
     )
     
@@ -159,7 +162,7 @@ if __name__ == "__main__":
             response = generate_answer(user_question)
             res = response["output_text"]
             
-            # Format the answer as an unordered list
+            # Render the answer as an HTML unordered list
             lines = res.split('\n')
             formatted_answer = "<ul>"
             for line in lines:
