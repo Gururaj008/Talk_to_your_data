@@ -19,7 +19,6 @@ def read_pdf(file):
     return text
 
 def read_docx(file):
-    # Read DOCX content
     doc = Document(file)
     text = ""
     for paragraph in doc.paragraphs:
@@ -58,7 +57,6 @@ def generate_answer(user_question):
     new_db = FAISS.load_local("faiss_index", embeddings)
     docs = new_db.similarity_search(user_question)
     
-    # Updated prompt with instructions for bullet list formatting and clear sections
     prompt_template = """
 You are an expert in evaluating profiles and answering questions based on the context provided.
 Follow these instructions carefully:
@@ -86,9 +84,8 @@ Answer:
 def format_response(answer_text):
     """
     This function formats the raw answer text into a custom-styled HTML unordered list.
-    Custom CSS is injected to improve the appearance (spacing, font-size, and margins).
+    Custom CSS is injected to improve the appearance.
     """
-    # Custom CSS for the bullet list styling
     custom_css = """
     <style>
     .custom-ul {
@@ -103,17 +100,14 @@ def format_response(answer_text):
     }
     </style>
     """
-    # Split answer text into lines and create bullet items
     lines = answer_text.split('\n')
     list_items = ""
     for line in lines:
         clean_line = line.strip()
         if clean_line:
-            # Remove any bullet markers
             if clean_line.startswith("*") or clean_line.startswith("-"):
                 clean_line = clean_line.lstrip("*- ").strip()
             list_items += f"<li>{clean_line}</li>"
-    # Combine CSS and formatted list
     formatted_html = custom_css + f"<ul class='custom-ul'>{list_items}</ul>"
     return formatted_html
 
@@ -139,10 +133,9 @@ if __name__ == "__main__":
     
     st.divider()
     
-    # About the project
     st.subheader('About the project')
     st.markdown(
-        '<div style="text-align: justify">SmartText Insight is an AI-driven application that simplifies document interaction and question-answering processes. Users can effortlessly upload PDF, DOCX, or TXT files and receive contextually relevant responses to their inquiries. The application employs advanced natural language processing techniques and document embeddings to enhance user understanding of textual content. The technology behind SmartText Insight includes the integration of Google DeepMind\'s "Gemini-Pro" model, GoogleGenerativeAIEmbeddings for document embeddings, and FAISS vector store for efficient indexing. With a straightforward and user-friendly interface, SmartText Insight streamlines document exploration and facilitates intelligent interactions with textual data.</div>',
+        '<div style="text-align: justify">SmartText Insight is an AI-driven application that simplifies document interaction and question-answering processes. Users can upload PDF, DOCX, or TXT files and receive contextually relevant responses based on the content of the documents. The app employs advanced NLP techniques, GoogleGenerativeAIEmbeddings, and a FAISS vector store for efficient document indexing and retrieval.</div>',
         unsafe_allow_html=True
     )
     
@@ -160,7 +153,7 @@ if __name__ == "__main__":
     )
     st.write('')
     st.markdown(
-        '<div style="text-align: justify">3. Enter your question in the text box below. The app will generate a response based on the content of your documents.</div>',
+        '<div style="text-align: justify">3. Enter your question in the text box below. The app will generate a response based on your documents.</div>',
         unsafe_allow_html=True
     )
     st.write('')
@@ -177,25 +170,26 @@ if __name__ == "__main__":
     if not uploaded_files:
         st.warning("Please upload files first.")
 
-    # "Click here to proceed" button for processing files
     if st.button('Click here to proceed', use_container_width=True) and uploaded_files:
         with st.spinner("Training..."):
             create_embeddings(uploaded_files)
         st.success('Now I am ready to respond to your questions..')
 
     st.write('')
-    # User question input
     user_question = st.text_input("Ask a Question from the File")
 
-    # Process button
     if st.button("Fetch the answer", use_container_width=True) and uploaded_files and user_question:
         with st.spinner("Processing..."):
             response = generate_answer(user_question)
-            res = response["output_text"]
-            formatted_answer = format_response(res)
-            
-            st.markdown(formatted_answer, unsafe_allow_html=True)
-            st.write('')
+            # Debug: show the raw response for troubleshooting
+            st.write("DEBUG: Raw response from the model:", response)
+            res = response.get("output_text", "").strip()
+            if not res:
+                st.error("No answer was generated. Please check your input or file content.")
+            else:
+                st.write("DEBUG: Raw answer text:", res)
+                formatted_answer = format_response(res)
+                st.markdown(formatted_answer, unsafe_allow_html=True)
             st.write('')
             st.info("Feel free to ask more questions or upload additional documents.")
 
