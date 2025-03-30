@@ -67,8 +67,8 @@ def generate_answer(user_question):
     Always stick to the following while answering the user questions:
     1. Try to understand the user question thourougly before answering the question
     2. Answer the question as detailed as possible
-    3. Return your answer in bulleted form, where each bulleted answer is on a seperate line
-    4. If you dont know the answer or feel the answer is not present in the context,
+    
+    3. If you dont know the answer or feel the answer is not present in the context,
     politely tell user "I cant answer the question based on the context provided, 
     try rephrasing the question or ask a new question"
     5. Dont try to make up answer\n\n
