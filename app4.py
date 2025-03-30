@@ -151,14 +151,10 @@ if __name__ == "__main__":
     if st.button("Fetch the answer", use_container_width=True) and uploaded_files and user_question:
         with st.spinner("Processing..."):
             response = generate_answer(user_question)
-            # Debug output (can be removed later)
-            st.write("DEBUG: Raw response from the model:", response)
             res = response.get("output_text", "").strip()
             if not res:
                 st.error("No answer was generated. Please check your input or file content.")
             else:
-                st.write("DEBUG: Raw answer text:", res)
-                # Inject custom CSS for Markdown bullet lists
                 custom_css = """
                 <style>
                 ul {
@@ -174,9 +170,7 @@ if __name__ == "__main__":
                 </style>
                 """
                 st.markdown(custom_css, unsafe_allow_html=True)
-                # Render the raw answer text as Markdown
                 st.markdown(res)
-        st.write('')
         st.info("Feel free to ask more questions or upload additional documents.")
 
     st.divider()
