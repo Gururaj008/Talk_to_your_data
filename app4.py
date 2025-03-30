@@ -81,36 +81,6 @@ Answer:
     response = chain({"input_documents": docs, "question": user_question}, return_only_outputs=True)
     return response
 
-def format_response(answer_text):
-    """
-    This function formats the raw answer text into a custom-styled HTML unordered list.
-    Custom CSS is injected to improve the appearance.
-    """
-    custom_css = """
-    <style>
-    .custom-ul {
-      list-style: disc;
-      margin-left: 30px;
-      font-size: 18px;
-      line-height: 1.6;
-      color: #333;
-    }
-    .custom-ul li {
-      margin-bottom: 10px;
-    }
-    </style>
-    """
-    lines = answer_text.split('\n')
-    list_items = ""
-    for line in lines:
-        clean_line = line.strip()
-        if clean_line:
-            if clean_line.startswith("*") or clean_line.startswith("-"):
-                clean_line = clean_line.lstrip("*- ").strip()
-            list_items += f"<li>{clean_line}</li>"
-    formatted_html = custom_css + f"<ul class='custom-ul'>{list_items}</ul>"
-    return formatted_html
-
 if __name__ == "__main__":
     st.set_page_config(layout="wide")
     st.markdown("""
@@ -181,17 +151,33 @@ if __name__ == "__main__":
     if st.button("Fetch the answer", use_container_width=True) and uploaded_files and user_question:
         with st.spinner("Processing..."):
             response = generate_answer(user_question)
-            # Debug: show the raw response for troubleshooting
+            # Debug output (can be removed later)
             st.write("DEBUG: Raw response from the model:", response)
             res = response.get("output_text", "").strip()
             if not res:
                 st.error("No answer was generated. Please check your input or file content.")
             else:
                 st.write("DEBUG: Raw answer text:", res)
-                formatted_answer = format_response(res)
-                st.markdown(formatted_answer, unsafe_allow_html=True)
-            st.write('')
-            st.info("Feel free to ask more questions or upload additional documents.")
+                # Inject custom CSS for Markdown bullet lists
+                custom_css = """
+                <style>
+                ul {
+                    list-style-type: disc;
+                    margin-left: 40px;
+                    font-size: 18px;
+                    line-height: 1.6;
+                    color: #333;
+                }
+                li {
+                    margin-bottom: 10px;
+                }
+                </style>
+                """
+                st.markdown(custom_css, unsafe_allow_html=True)
+                # Render the raw answer text as Markdown
+                st.markdown(res)
+        st.write('')
+        st.info("Feel free to ask more questions or upload additional documents.")
 
     st.divider()
     col1001, col1002, col1003, col1004, col1005 = st.columns([10,10,10,10,15])
